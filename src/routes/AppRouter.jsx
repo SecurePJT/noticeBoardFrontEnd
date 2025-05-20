@@ -2,8 +2,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
+import SignupPage from '../pages/SignupPage';
 import WritePage from '../pages/WritePage';
-import MainPage from '../pages/MainPage';
 import BoardPage from '../pages/BoardPage';
 import MyPostsPage from '../pages/MyPostsPage';
 import PostDetailPage from '../pages/PostDetailPage';
@@ -66,10 +66,25 @@ function AppRouter({ user, setUser }) {
     </div>
   );
 
+  const SignupWrapper = (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', background: '#f8f8f8' }}>
+      <header style={{ width: '100%', padding: '20px', background: '#fff', borderBottom: '1px solid #ccc', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>
+        Website
+      </header>
+      <main style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ border: '1px solid #ccc', padding: '40px', borderRadius: '8px', background: '#fff', width: '300px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Sign Up</h2>
+          <SignupPage />
+        </div>
+      </main>
+    </div>
+  );
+
   return (
     <Router>
       <Routes>
         <Route path="/login" element={LoginWrapper} />
+        <Route path="/signup" element={SignupWrapper} />
         <Route path="/" element={user ? <PageWrapper><StyledMainPage user={user} setUser={setUser} /></PageWrapper> : <Navigate to="/login" />} />
         <Route path="/write" element={user ? withBackButton(WritePage, { user }) : <Navigate to="/login" />} />
         <Route path="/board" element={user ? withBackButton(BoardPage) : <Navigate to="/login" />} />

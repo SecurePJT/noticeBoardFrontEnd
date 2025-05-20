@@ -1,58 +1,50 @@
-// pages/LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function LoginPage({ setUser }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const found = users.find((u) => u.username === username && u.password === password);
+  const handleLogin = async () => {
+    try {
+      const res = await axios.post('/api/login', {
+        username,
+        password,
+      });
 
-    if (!found) {
+      const found = res.data; // 백엔드에서 사용자 정보 반환 가정
+      localStorage.setItem('user', JSON.stringify(found));
+      setUser(found);
+      navigate('/');
+    } catch (error) {
       alert('아이디 또는 비밀번호가 틀렸습니다.');
-      return;
     }
-
-    localStorage.setItem('user', JSON.stringify(found));
-    setUser(found);
-    navigate('/'); // ✅ 로그인 성공 시 메인페이지로 이동
   };
 
-  const handleSignup = () => {
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const exists = users.find((u) => u.username === username);
-
-    if (exists) {
-      alert('이미 존재하는 사용자입니다.');
-      return;
-    }
-
-    const newUser = { username, password, role: 'user' };
-    const updated = [...users, newUser];
-    localStorage.setItem('users', JSON.stringify(updated));
-    alert('회원가입 완료! 이제 로그인하세요.');
+  const goToSignup = () => {
+    navigate('/signup');
   };
 
   return (
     <div>
-      <h2>Login / Sign Up</h2>
       <input
         type="text"
-        placeholder="Username"
+        placeholder="아이디"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
       <input
         type="password"
-        placeholder="Password"
+        placeholder="비밀번호"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
+        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
-      <button onClick={handleLogin}>Login</button>
-      <button onClick={handleSignup}>Sign Up</button>
+      <button onClick={handleLogin} style={{ width: '100%', padding: '10px', marginBottom: '8px' }}>로그인</button>
+      <button onClick={goToSignup} style={{ width: '100%', padding: '10px' }}>회원가입</button>
     </div>
   );
 }

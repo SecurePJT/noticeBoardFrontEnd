@@ -1,54 +1,47 @@
+// WritePage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function WritePage({ user }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [image, setImage] = useState(null);
   const navigate = useNavigate();
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImage(reader.result);
-    };
-    if (file) reader.readAsDataURL(file);
-  };
-
-  const handleSubmit = () => {
-    const newPost = {
-      id: Date.now(),
-      title,
-      content,
-      author: user.username,
-      image,
-    };
-
-    const existing = JSON.parse(localStorage.getItem('posts') || '[]');
-    const updated = [newPost, ...existing];
-    localStorage.setItem('posts', JSON.stringify(updated));
-    navigate('/board');
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      await axios.post('/api/posts', {
+        title,
+        content,
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      alert('게시글이 등록되었습니다.');
+      navigate('/board');
+    } catch (error) {
+      alert('게시글 작성 실패');
+    }
   };
 
   return (
     <div>
-      <h2>게시글 작성</h2>
       <input
         type="text"
         placeholder="제목"
         value={title}
         onChange={(e) => setTitle(e.target.value)}
+        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
       <textarea
         placeholder="내용"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-      ></textarea>
-      <input type="file" accept="image/*" onChange={handleImageChange} />
-      {image && <img src={image} alt="미리보기" style={{ width: '200px', marginTop: '10px' }} />}
-      <br />
-      <button onClick={handleSubmit}>저장</button>
+        style={{ width: '100%', height: '200px', padding: '8px', marginBottom: '10px' }}
+      />
+      <button onClick={handleSubmit} style={{ width: '100%', padding: '10px' }}>작성 완료</button>
     </div>
   );
 }
