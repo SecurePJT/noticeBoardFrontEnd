@@ -1,20 +1,14 @@
 // BoardPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function BoardPage() {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get('/api/posts')
-      .then((res) => {
-        setPosts(res.data);
-      })
-      .catch((err) => {
-        alert('게시글을 불러오지 못했습니다.');
-      });
+    const stored = JSON.parse(localStorage.getItem('posts') || '[]');
+    setPosts(stored);
   }, []);
 
   return (
@@ -27,6 +21,7 @@ function BoardPage() {
         >
           <h3>{post.title}</h3>
           <p>{post.content.slice(0, 100)}...</p>
+          <small>작성자: {post.author}</small>
         </div>
       ))}
     </div>

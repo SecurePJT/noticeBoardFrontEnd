@@ -1,30 +1,34 @@
+// LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function LoginPage({ setUser }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const res = await axios.post('/api/login', {
-        username,
-        password,
-      });
+  const handleLogin = () => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const found = users.find(
+      (u) => u.username === username && u.password === password
+    );
 
-      const found = res.data; // 백엔드에서 사용자 정보 반환 가정
-      localStorage.setItem('user', JSON.stringify(found));
-      setUser(found);
-      navigate('/');
-    } catch (error) {
+    if (!found) {
       alert('아이디 또는 비밀번호가 틀렸습니다.');
+      return;
     }
+
+    localStorage.setItem('user', JSON.stringify(found));
+    setUser(found);
+    navigate('/');
   };
 
   const goToSignup = () => {
     navigate('/signup');
+  };
+
+  const goToAdminSignup = () => {
+    navigate('/admin-signup');
   };
 
   return (
@@ -43,8 +47,24 @@ function LoginPage({ setUser }) {
         onChange={(e) => setPassword(e.target.value)}
         style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
-      <button onClick={handleLogin} style={{ width: '100%', padding: '10px', marginBottom: '8px' }}>로그인</button>
-      <button onClick={goToSignup} style={{ width: '100%', padding: '10px' }}>회원가입</button>
+      <button
+        onClick={handleLogin}
+        style={{ width: '100%', padding: '10px', marginBottom: '8px' }}
+      >
+        로그인
+      </button>
+      <button
+        onClick={goToSignup}
+        style={{ width: '100%', padding: '10px', marginBottom: '8px' }}
+      >
+        회원가입
+      </button>
+      <button
+        onClick={goToAdminSignup}
+        style={{ width: '100%', padding: '10px' }}
+      >
+        관리자 회원가입
+      </button>
     </div>
   );
 }

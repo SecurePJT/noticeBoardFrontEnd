@@ -1,40 +1,23 @@
 // MyPostsPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 
 function MyPostsPage({ user }) {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    axios.get('/api/posts/my', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((res) => {
-        setPosts(res.data);
-      })
-      .catch(() => {
-        alert('내 게시글을 불러오지 못했습니다.');
-      });
-  }, []);
+    const allPosts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const myPosts = allPosts.filter((post) => post.author === user.username);
+    setPosts(myPosts);
+  }, [user]);
 
-  const handleDelete = async (id) => {
+  const handleDelete = (id) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/api/posts/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setPosts(posts.filter(post => post.id !== id));
-    } catch {
-      alert('삭제 실패');
-    }
+    const allPosts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const updatedPosts = allPosts.filter((post) => post.id !== id);
+    localStorage.setItem('posts', JSON.stringify(updatedPosts));
+    setPosts(updatedPosts.filter((post) => post.author === user.username));
   };
 
   return (

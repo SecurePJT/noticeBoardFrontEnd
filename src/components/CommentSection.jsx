@@ -1,54 +1,40 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+// CommentSection.jsx
+import React, { useEffect, useState, useCallback } from 'react';
 
 function CommentSection({ postId, user }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
-  const fetchComments = () => {
-    axios.get(`/api/posts/${postId}/comments`)
-      .then((res) => {
-        setComments(res.data);
-      })
-      .catch(() => {
-        alert('댓글을 불러올 수 없습니다.');
-      });
-  };
+  const fetchComments = useCallback(() => {
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const filtered = allComments.filter((c) => String(c.postId) === String(postId));
+    setComments(filtered);
+  }, [postId]);
 
   useEffect(() => {
     fetchComments();
-  }, [postId]);
+  }, [fetchComments]);
 
-  const handleSubmit = async () => {
-    try {
-      const token = localStorage.getItem('token');
-      await axios.post(`/api/posts/${postId}/comments`, {
-        content: newComment,
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setNewComment('');
-      fetchComments();
-    } catch {
-      alert('댓글 등록 실패');
-    }
+  const handleSubmit = () => {
+    if (!newComment.trim()) return;
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const newItem = {
+      id: Date.now(),
+      postId,
+      content: newComment,
+      author: user.username,
+    };
+    localStorage.setItem('comments', JSON.stringify([...allComments, newItem]));
+    setNewComment('');
+    fetchComments();
   };
 
-  const handleDelete = async (commentId) => {
+  const handleDelete = (commentId) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      await axios.delete(`/api/comments/${commentId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      fetchComments();
-    } catch {
-      alert('댓글 삭제 실패');
-    }
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const filtered = allComments.filter((c) => c.id !== commentId);
+    localStorage.setItem('comments', JSON.stringify(filtered));
+    fetchComments();
   };
 
   return (
@@ -64,11 +50,13 @@ function CommentSection({ postId, user }) {
 
       {comments.map((comment) => (
         <div key={comment.id} style={{ borderTop: '1px solid #ddd', padding: '10px 0' }}>
-          <p>{comment.content}</p>
-          <small>{comment.author}</small>
-          {(user?.role === 'admin' || user?.username === comment.author) && (
-            <button onClick={() => handleDelete(comment.id)} style={{ marginLeft: '10px' }}>삭제</button>
-          )}
+          <p style={{ marginBottom: '6px' }}>{comment.content}</p>
+          <div style={{ fontSize: '14px', color: '#555' }}>
+            작성자: <strong>{comment.author}</strong>
+            {(user?.role === 'admin' || user?.username === comment.author) && (
+              <button onClick={() => handleDelete(comment.id)} style={{ marginLeft: '10px' }}>삭제</button>
+            )}
+          </div>
         </div>
       ))}
     </div>
