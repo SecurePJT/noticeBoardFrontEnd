@@ -1,6 +1,8 @@
 // LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import './LoginPage.css';
+
 
 function LoginPage({ setUser }) {
   const [username, setUsername] = useState('');
@@ -32,41 +34,28 @@ function LoginPage({ setUser }) {
   };
 
   return (
-    <div>
+  <div className="login-wrapper">
+    <div className="login-card">
+      <h2>Login</h2>
       <input
         type="text"
         placeholder="아이디"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
       <input
         type="password"
         placeholder="비밀번호"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
-        style={{ width: '100%', padding: '8px', marginBottom: '10px' }}
       />
-      <button
-        onClick={handleLogin}
-        style={{ width: '100%', padding: '10px', marginBottom: '8px' }}
-      >
-        로그인
-      </button>
-      <button
-        onClick={goToSignup}
-        style={{ width: '100%', padding: '10px', marginBottom: '8px' }}
-      >
-        회원가입
-      </button>
-      <button
-        onClick={goToAdminSignup}
-        style={{ width: '100%', padding: '10px' }}
-      >
-        관리자 회원가입
-      </button>
+      <button className="login-btn" onClick={handleLogin}>로그인</button>
+      <button className="signup-btn" onClick={goToSignup}>회원가입</button>
+      <button className="signup-btn" onClick={goToAdminSignup}>관리자 회원가입</button>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default LoginPage;
