@@ -1,25 +1,26 @@
 // WritePage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // axios 인스턴스 import
 
 function WritePage({ user }) {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
-    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const newPost = {
-      id: Date.now(),
-      title,
-      content,
-      author: user.username,
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem('posts', JSON.stringify([...posts, newPost]));
-    alert('게시글이 등록되었습니다.');
-    navigate('/board');
+  const handleSubmit = async () => {
+    try {
+      await api.post('/posts', {
+        title,
+        content,
+        author: user.username,
+        createdAt: new Date().toISOString(),
+      });
+      alert('게시글이 등록되었습니다.');
+      navigate('/board');
+    } catch (error) {
+      alert('게시글 등록에 실패했습니다.');
+    }
   };
 
   return (

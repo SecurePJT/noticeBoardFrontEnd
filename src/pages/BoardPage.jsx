@@ -1,14 +1,23 @@
 // BoardPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // axios 인스턴스 import
 
 function BoardPage() {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem('posts') || '[]');
-    setPosts(stored);
+    const fetchPosts = async () => {
+      try {
+        const response = await api.get('/posts');
+        setPosts(response.data);
+      } catch (error) {
+        alert('게시글을 불러오지 못했습니다.');
+      }
+    };
+
+    fetchPosts();
   }, []);
 
   return (

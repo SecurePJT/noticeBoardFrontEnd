@@ -1,14 +1,37 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+// EditPostPage.jsx
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../api'; // axios 인스턴스 import
 
 function EditPostPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
 
-  const handleEdit = () => {
-    console.log('수정 완료:', { id, title, content });
-    // TODO: API 연동
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const response = await api.get(`/posts/${id}`);
+        setTitle(response.data.title);
+        setContent(response.data.content);
+      } catch (error) {
+        alert('게시글을 불러오는 데 실패했습니다.');
+        navigate('/board');
+      }
+    };
+
+    fetchPost();
+  }, [id, navigate]);
+
+  const handleEdit = async () => {
+    try {
+      await api.put(`/posts/${id}`, { title, content });
+      alert('수정 완료되었습니다.');
+      navigate(`/board/${id}`);
+    } catch (error) {
+      alert('수정에 실패했습니다.');
+    }
   };
 
   return (
