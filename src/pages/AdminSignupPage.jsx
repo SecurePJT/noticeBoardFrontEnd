@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // axios 인스턴스
 
 function AdminSignupPage() {
   const [username, setUsername] = useState('');
@@ -7,29 +8,23 @@ function AdminSignupPage() {
   const [adminCode, setAdminCode] = useState('');
   const navigate = useNavigate();
 
-  const handleSignup = () => {
+  const handleSignup = async () => {
     if (adminCode !== 'AQW2ER5PO21') {
       alert('관리자 코드가 올바르지 않습니다.');
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const exists = users.find((u) => u.username === username);
-
-    if (exists) {
+    try {
+      await api.post('/admin-signup', {
+        username,
+        password,
+        role: 'admin',
+      });
+      alert('관리자 회원가입 완료! 로그인 페이지로 이동합니다.');
+      navigate('/login');
+    } catch (error) {
       alert('이미 존재하는 아이디입니다.');
-      return;
     }
-
-    const newUser = {
-      username,
-      password,
-      role: 'admin',
-    };
-
-    localStorage.setItem('users', JSON.stringify([...users, newUser]));
-    alert('관리자 회원가입 완료! 로그인 페이지로 이동합니다.');
-    navigate('/login');
   };
 
   return (

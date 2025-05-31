@@ -1,5 +1,7 @@
+// AdminPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // axios 인스턴스
 
 function AdminPage() {
   const [users, setUsers] = useState([]);
@@ -10,15 +12,25 @@ function AdminPage() {
   const currentUser = JSON.parse(localStorage.getItem('user'));
 
   useEffect(() => {
-    const loadedUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const loadedPosts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const loadedComments = JSON.parse(localStorage.getItem('comments') || '[]');
-    setUsers(loadedUsers);
-    setPosts(loadedPosts);
-    setComments(loadedComments);
+    const fetchData = async () => {
+      try {
+        const [usersRes, postsRes, commentsRes] = await Promise.all([
+          api.get('/admin/users'),
+          api.get('/admin/posts'),
+          api.get('/admin/comments'),
+        ]);
+        setUsers(usersRes.data);
+        setPosts(postsRes.data);
+        setComments(commentsRes.data);
+      } catch (error) {
+        alert('데이터를 불러오지 못했습니다.');
+      }
+    };
+
+    fetchData();
   }, []);
 
-  const handleDeleteUser = (usernameToDelete) => {
+  const handleDeleteUser = async (usernameToDelete) => {
     if (currentUser.username === usernameToDelete) {
       alert('자기 자신은 삭제할 수 없습니다.');
       return;
@@ -26,40 +38,38 @@ function AdminPage() {
 
     if (!window.confirm(`${usernameToDelete} 계정과 관련된 모든 게시글 및 댓글을 삭제하시겠습니까?`)) return;
 
-    const updatedUsers = users.filter((user) => user.username !== usernameToDelete);
-    const updatedPosts = posts.filter((post) => post.author !== usernameToDelete);
-    const updatedComments = comments.filter((comment) => comment.author !== usernameToDelete);
-
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.setItem('posts', JSON.stringify(updatedPosts));
-    localStorage.setItem('comments', JSON.stringify(updatedComments));
-
-    setUsers(updatedUsers);
-    setPosts(updatedPosts);
-    setComments(updatedComments);
-
-    alert('유저 및 해당 유저의 게시글/댓글이 삭제되었습니다.');
+    try {
+      await api.delete(`/admin/users/${usernameToDelete}`);
+      setUsers((prev) => prev.filter((user) => user.username !== usernameToDelete));
+      setPosts((prev) => prev.filter((post) => post.author !== usernameToDelete));
+      setComments((prev) => prev.filter((comment) => comment.author !== usernameToDelete));
+      alert('유저 및 해당 유저의 게시글/댓글이 삭제되었습니다.');
+    } catch (error) {
+      alert('삭제에 실패했습니다.');
+    }
   };
 
-  const handleDeletePost = (postId) => {
+  const handleDeletePost = async (postId) => {
     if (!window.confirm('이 게시글을 삭제하시겠습니까?')) return;
 
-    const updatedPosts = posts.filter((post) => post.id !== postId);
-    const updatedComments = comments.filter((comment) => comment.postId !== postId);
-
-    localStorage.setItem('posts', JSON.stringify(updatedPosts));
-    localStorage.setItem('comments', JSON.stringify(updatedComments));
-
-    setPosts(updatedPosts);
-    setComments(updatedComments);
+    try {
+      await api.delete(`/admin/posts/${postId}`);
+      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      setComments((prev) => prev.filter((comment) => comment.postId !== postId));
+    } catch (error) {
+      alert('게시글 삭제에 실패했습니다.');
+    }
   };
 
-  const handleDeleteComment = (commentId) => {
+  const handleDeleteComment = async (commentId) => {
     if (!window.confirm('이 댓글을 삭제하시겠습니까?')) return;
 
-    const updatedComments = comments.filter((comment) => comment.id !== commentId);
-    localStorage.setItem('comments', JSON.stringify(updatedComments));
-    setComments(updatedComments);
+    try {
+      await api.delete(`/admin/comments/${commentId}`);
+      setComments((prev) => prev.filter((comment) => comment.id !== commentId));
+    } catch (error) {
+      alert('댓글 삭제에 실패했습니다.');
+    }
   };
 
   return (

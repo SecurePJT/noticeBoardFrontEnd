@@ -1,23 +1,34 @@
+// MyPostsPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // Axios 인스턴스 import
 
 function MyPostsPage({ user }) {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const allPosts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const myPosts = allPosts.filter((post) => post.author === user.username);
-    setPosts(myPosts);
+    const fetchMyPosts = async () => {
+      try {
+        const response = await api.get(`/posts?author=${user.username}`);
+        setPosts(response.data);
+      } catch (error) {
+        alert('내 게시글을 불러오지 못했습니다.');
+      }
+    };
+
+    fetchMyPosts();
   }, [user]);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
 
-    const allPosts = JSON.parse(localStorage.getItem('posts') || '[]');
-    const updatedPosts = allPosts.filter((post) => post.id !== id);
-    localStorage.setItem('posts', JSON.stringify(updatedPosts));
-    setPosts(updatedPosts.filter((post) => post.author === user.username));
+    try {
+      await api.delete(`/posts/${id}`);
+      setPosts((prev) => prev.filter((post) => post.id !== id));
+    } catch (error) {
+      alert('삭제에 실패했습니다.');
+    }
   };
 
   return (
