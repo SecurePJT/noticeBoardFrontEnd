@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import CommentSection from '../components/CommentSection';
-import api from '../api'; // axios 인스턴스 import
 
 function PostDetailPage({ user }) {
   const { id } = useParams();
@@ -10,28 +9,23 @@ function PostDetailPage({ user }) {
   const [post, setPost] = useState(null);
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await api.get(`/posts/${id}`);
-        setPost(response.data);
-      } catch (error) {
-        alert('게시글을 찾을 수 없습니다.');
-        navigate('/board');
-      }
-    };
-
-    fetchPost();
+    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const found = posts.find((p) => String(p.id) === String(id));
+    if (found) {
+      setPost(found);
+    } else {
+      alert('게시글을 찾을 수 없습니다.');
+      navigate('/board');
+    }
   }, [id, navigate]);
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    try {
-      await api.delete(`/posts/${id}`);
-      alert('삭제되었습니다.');
-      navigate('/board');
-    } catch (error) {
-      alert('삭제에 실패했습니다.');
-    }
+    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const updated = posts.filter((p) => String(p.id) !== String(id));
+    localStorage.setItem('posts', JSON.stringify(updated));
+    alert('삭제되었습니다.');
+    navigate('/board');
   };
 
   if (!post) return <div>로딩 중...</div>;

@@ -1,28 +1,36 @@
-// BoardPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; // axios 인스턴스 import
 
 function BoardPage() {
   const [posts, setPosts] = useState([]);
+  const [search, setSearch] = useState('');
+  const [filteredPosts, setFilteredPosts] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const response = await api.get('/posts');
-        setPosts(response.data);
-      } catch (error) {
-        alert('게시글을 불러오지 못했습니다.');
-      }
-    };
-
-    fetchPosts();
+    const stored = JSON.parse(localStorage.getItem('posts') || '[]');
+    setPosts(stored);
+    setFilteredPosts(stored);
   }, []);
+
+  useEffect(() => {
+    const lowerSearch = search.toLowerCase();
+    const filtered = posts.filter((post) =>
+      post.title.toLowerCase().includes(lowerSearch)
+    );
+    setFilteredPosts(filtered);
+  }, [search, posts]);
 
   return (
     <div>
-      {posts.map((post) => (
+      <input
+        type="text"
+        placeholder="제목 검색"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        style={{ width: '100%', padding: '10px', marginBottom: '20px', fontSize: '16px' }}
+      />
+      {filteredPosts.map((post) => (
         <div
           key={post.id}
           onClick={() => navigate(`/board/${post.id}`)}

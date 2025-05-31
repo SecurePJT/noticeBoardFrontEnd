@@ -1,4 +1,3 @@
-// AppRouter.jsx
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
@@ -66,27 +65,47 @@ function AppRouter({ user, setUser }) {
         position: 'relative'
       }}>
         <span style={{ fontSize: '24px', fontWeight: 'bold' }}>Website</span>
-        <button
-          onClick={() => {
-            localStorage.removeItem('user');
-            setUser(null);
-            window.location.href = '/login';
-          }}
-          style={{
-            position: 'absolute',
-            right: '50px',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            padding: '6px 12px',
-            fontSize: '14px',
-            border: '1px solid #999',
-            borderRadius: '4px',
-            background: '#fff',
-            cursor: 'pointer'
-          }}
-        >
-          로그아웃
-        </button>
+        {user ? (
+          <button
+            onClick={() => {
+              localStorage.removeItem('user');
+              setUser(null);
+              window.location.href = '/';
+            }}
+            style={{
+              position: 'absolute',
+              right: '50px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '6px 12px',
+              fontSize: '14px',
+              border: '1px solid #999',
+              borderRadius: '4px',
+              background: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            로그아웃
+          </button>
+        ) : (
+          <button
+            onClick={() => window.location.href = '/login'}
+            style={{
+              position: 'absolute',
+              right: '50px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              padding: '6px 12px',
+              fontSize: '14px',
+              border: '1px solid #999',
+              borderRadius: '4px',
+              background: '#fff',
+              cursor: 'pointer'
+            }}
+          >
+            로그인
+          </button>
+        )}
       </header>
       <main style={{ flexGrow: 1, padding: '20px' }}>{children}</main>
     </div>
@@ -132,13 +151,13 @@ function AppRouter({ user, setUser }) {
         <Route path="/login" element={LoginWrapper} />
         <Route path="/signup" element={SignupWrapper(<SignupPage />)} />
         <Route path="/admin-signup" element={SignupWrapper(<AdminSignupPage />)} />
-        <Route path="/" element={user ? <PageWrapper><StyledMainPage user={user} setUser={setUser} /></PageWrapper> : <Navigate to="/login" />} />
-        <Route path="/write" element={user ? withBackButton(WritePage, { user }) : <Navigate to="/login" />} />
-        <Route path="/board" element={user ? withBackButton(BoardPage) : <Navigate to="/login" />} />
-        <Route path="/board/:id" element={user ? withBackButton(PostDetailPage, { user }) : <Navigate to="/login" />} />
-        <Route path="/my-posts" element={user ? withBackButton(MyPostsPage, { user }) : <Navigate to="/login" />} />
+        <Route path="/" element={<PageWrapper user={user} setUser={setUser}><StyledMainPage user={user} setUser={setUser} /></PageWrapper>} />
+        <Route path="/write" element={withBackButton(WritePage, { user })} />
+        <Route path="/board" element={withBackButton(BoardPage)} />
+        <Route path="/board/:id" element={withBackButton(PostDetailPage, { user })} />
+        <Route path="/my-posts" element={user ? withBackButton(MyPostsPage, { user }) : <Navigate to="/" />} />
         <Route path="/admin" element={user?.role === 'admin' ? <PageWrapper><AdminPage /></PageWrapper> : <Navigate to="/" />} />
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

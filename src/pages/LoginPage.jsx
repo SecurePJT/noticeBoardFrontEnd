@@ -1,28 +1,26 @@
-// LoginPage.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-import api from '../api'; // axios 인스턴스 import
 
 function LoginPage({ setUser }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const response = await api.post('/login', {
-        username,
-        password,
-      });
+  const handleLogin = () => {
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const found = users.find(
+      (u) => u.username === username && u.password === password
+    );
 
-      const found = response.data; // 백엔드에서 반환된 사용자 정보
-      localStorage.setItem('user', JSON.stringify(found));
-      setUser(found);
-      navigate('/');
-    } catch (error) {
+    if (!found) {
       alert('아이디 또는 비밀번호가 틀렸습니다.');
+      return;
     }
+
+    localStorage.setItem('user', JSON.stringify(found));
+    setUser(found);
+    navigate('/');
   };
 
   const goToSignup = () => {

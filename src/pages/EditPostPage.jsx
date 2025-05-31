@@ -1,7 +1,6 @@
 // EditPostPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../api'; // axios 인스턴스 import
 
 function EditPostPage() {
   const { id } = useParams();
@@ -10,28 +9,25 @@ function EditPostPage() {
   const [content, setContent] = useState('');
 
   useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        const response = await api.get(`/posts/${id}`);
-        setTitle(response.data.title);
-        setContent(response.data.content);
-      } catch (error) {
-        alert('게시글을 불러오는 데 실패했습니다.');
-        navigate('/board');
-      }
-    };
-
-    fetchPost();
+    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const found = posts.find((p) => String(p.id) === String(id));
+    if (found) {
+      setTitle(found.title);
+      setContent(found.content);
+    } else {
+      alert('게시글을 불러오는 데 실패했습니다.');
+      navigate('/board');
+    }
   }, [id, navigate]);
 
-  const handleEdit = async () => {
-    try {
-      await api.put(`/posts/${id}`, { title, content });
-      alert('수정 완료되었습니다.');
-      navigate(`/board/${id}`);
-    } catch (error) {
-      alert('수정에 실패했습니다.');
-    }
+  const handleEdit = () => {
+    const posts = JSON.parse(localStorage.getItem('posts') || '[]');
+    const updatedPosts = posts.map((p) =>
+      String(p.id) === String(id) ? { ...p, title, content } : p
+    );
+    localStorage.setItem('posts', JSON.stringify(updatedPosts));
+    alert('수정 완료되었습니다.');
+    navigate(`/board/${id}`);
   };
 
   return (

@@ -1,46 +1,43 @@
 // CommentSection.jsx
 import React, { useEffect, useState, useCallback } from 'react';
-import api from '../api';
 
 function CommentSection({ postId, user }) {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
 
-  const fetchComments = useCallback(async () => {
-    try {
-      const response = await api.get(`/posts/${postId}/comments`);
-      setComments(response.data);
-    } catch (error) {
-      alert('댓글을 불러오지 못했습니다.');
-    }
+  const fetchComments = useCallback(() => {
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const filtered = allComments.filter((c) => String(c.postId) === String(postId));
+    setComments(filtered);
   }, [postId]);
 
   useEffect(() => {
     fetchComments();
   }, [fetchComments]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     if (!newComment.trim()) return;
-    try {
-      await api.post(`/posts/${postId}/comments`, {
-        content: newComment,
-        author: user.username,
-      });
-      setNewComment('');
-      fetchComments();
-    } catch (error) {
-      alert('댓글 등록에 실패했습니다.');
-    }
+
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const newItem = {
+      id: Date.now(),
+      postId,
+      content: newComment,
+      author: user?.username || '익명', // ✅ 익명 처리
+    };
+
+    localStorage.setItem('comments', JSON.stringify([...allComments, newItem]));
+    setNewComment('');
+    fetchComments();
   };
 
-  const handleDelete = async (commentId) => {
+  const handleDelete = (commentId) => {
     if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-    try {
-      await api.delete(`/comments/${commentId}`);
-      fetchComments();
-    } catch (error) {
-      alert('댓글 삭제에 실패했습니다.');
-    }
+
+    const allComments = JSON.parse(localStorage.getItem('comments') || '[]');
+    const filtered = allComments.filter((c) => c.id !== commentId);
+    localStorage.setItem('comments', JSON.stringify(filtered));
+    fetchComments();
   };
 
   return (
