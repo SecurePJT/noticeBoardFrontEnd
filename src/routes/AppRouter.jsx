@@ -118,19 +118,11 @@ function AppRouter({ user, setUser }) {
     </PageWrapper>
   );
 
-  const LoginWrapper = (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', background: '#f8f8f8' }}>
-      <header style={{ width: '100%', padding: '20px', background: '#fff', borderBottom: '1px solid #ccc', textAlign: 'center', fontSize: '24px', fontWeight: 'bold' }}>
-        Website
-      </header>
-      <main style={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ border: '1px solid #ccc', padding: '40px', borderRadius: '8px', background: '#fff', width: '300px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
-          <h2 style={{ marginBottom: '20px', textAlign: 'center' }}>Login</h2>
-          <LoginPage setUser={setUser} />
-        </div>
-      </main>
-    </div>
-  );
+const LoginWrapper = (
+  <PageWrapper>
+    <LoginPage setUser={setUser} />
+  </PageWrapper>
+);
 
   const SignupWrapper = (Component) => (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', background: '#f8f8f8' }}>
